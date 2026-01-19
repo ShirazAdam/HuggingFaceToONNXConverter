@@ -1,6 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HuggingFaceToOnnx.App.Services;
+using System;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace HuggingFaceToOnnx.App.ViewModels
@@ -8,9 +12,10 @@ namespace HuggingFaceToOnnx.App.ViewModels
     public partial class MainViewModel : ObservableObject
     {
         private readonly IConverterService _converterService;
+        private readonly IFileService _fileService;
 
         [ObservableProperty]
-        private string _modelId;
+        private ObservableCollection<ConversionItemViewModel> _models = new();
 
         [ObservableProperty]
         private string _outputDirectory;
@@ -22,48 +27,80 @@ namespace HuggingFaceToOnnx.App.ViewModels
         [ObservableProperty]
         private string _logOutput;
 
-        public MainViewModel(IConverterService converterService)
+        public MainViewModel(IConverterService converterService, IFileService fileService)
         {
             _converterService = converterService;
+            _fileService = fileService;
             _logOutput = "Ready to convert.\n";
-            _outputDirectory = System.IO.Directory.GetCurrentDirectory(); // Default
+            _outputDirectory = System.IO.Directory.GetCurrentDirectory();
         }
 
         [RelayCommand(CanExecute = nameof(CanConvert))]
         private async Task ConvertAsync()
         {
             IsBusy = true;
-            LogOutput = ""; // Clear or append? Let's clear for new run.
-            AppendLog($"Starting conversion for {ModelId}...");
+            LogOutput = "";
+            AppendLog("Starting parallel conversion...");
 
-            await _converterService.ConvertModelAsync(ModelId, OutputDirectory, AppendLog);
+            var tasks = Models.Where(m => m.Status != "Success").Select(async model =>
+            {
+                model.Status = "Converting...";
+                var modelDir = Directory.GetParent(model.FilePath)?.FullName ?? model.FilePath;
+                var modelName = Path.GetFileName(model.FilePath);
+                var folderName = Path.GetFileNameWithoutExtension(model.FilePath);
+                var specificOutput = Path.Combine(OutputDirectory, folderName);
+
+                try
+                {
+                    // We log with prefix
+                    await _converterService.ConvertModelAsync(modelDir, specificOutput, (msg) => AppendLog($"[{modelName}] {msg}"));
+                    model.Status = "Success";
+                }
+                catch (Exception ex)
+                {
+                    model.Status = "Failed";
+                    AppendLog($"[{modelName}] Check failed: {ex.Message}");
+                }
+            });
+
+            await Task.WhenAll(tasks);
 
             IsBusy = false;
+            AppendLog("All conversions finished.");
         }
 
         private bool CanConvert()
         {
-            return !string.IsNullOrWhiteSpace(ModelId) && !IsBusy;
+            return Models.Any() && !IsBusy;
         }
 
         [RelayCommand]
-        private void BrowseFolder()
+        private void BrowseFiles()
         {
-            // TODO: Implement proper FolderPicker for WPF without WinForms dependency
-            // For now, we rely on manual entry or pasting.
-            // Alternatively, could use Windows APICodePack or similar.
-            _logOutput += "Folder browsing not implemented in this version (WinForms dep removed). Please type path.\n";
-            OnPropertyChanged(nameof(LogOutput));
+            var files = _fileService.OpenFiles("Model Files|*.safetensors;*.bin;*.pt;*.h5|All Files|*.*");
+            foreach (var file in files)
+            {
+                if (!Models.Any(m => m.FilePath == file))
+                {
+                    Models.Add(new ConversionItemViewModel(file));
+                }
+            }
+            ConvertCommand.NotifyCanExecuteChanged();
+        }
+
+        [RelayCommand]
+        private void BrowseOutputFolder()
+        {
+            var folder = _fileService.PickFolder();
+            if (!string.IsNullOrEmpty(folder))
+            {
+                OutputDirectory = folder;
+            }
         }
 
         private void AppendLog(string message)
         {
-            // Marshall to UI thread if needed? properties are usually fine if set, 
-            // but ObservableProperty raises PropertyChanged.
-            // CommunityToolkit.Mvvm doesn't automatically marshal.
-            // In WPF, we might need Application.Current.Dispatcher.
-            
-            System.Windows.Application.Current.Dispatcher.Invoke(() => 
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 LogOutput += message + "\n";
             });

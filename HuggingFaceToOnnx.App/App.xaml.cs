@@ -20,7 +20,8 @@ namespace HuggingFaceToOnnx.App
             var services = new ServiceCollection();
 
             // Services
-            services.AddSingleton<IConverterService, ConverterService>();
+                        services.AddSingleton<IConverterService, ConverterService>();
+            services.AddSingleton<IFileService, FileService>();
 
             // ViewModels
             services.AddTransient<MainViewModel>();
