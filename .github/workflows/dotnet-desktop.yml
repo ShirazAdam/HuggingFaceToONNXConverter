@@ -80,3 +80,8 @@ jobs:
         run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
         env:
           Configuration: ${{ matrix.configuration }}
+
+      - name: Build the application
+        run: msbuild $env:Solution_Name /t:Build /p:Configuration=$env:Configuration
+        env:
+          Configuration: ${{ matrix.configuration }}
