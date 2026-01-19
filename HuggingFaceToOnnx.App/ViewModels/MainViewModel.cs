@@ -1,45 +1,31 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HuggingFaceToOnnx.App.Services;
-using System;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace HuggingFaceToOnnx.App.ViewModels
 {
-    public partial class MainViewModel : ObservableObject
+    public partial class MainViewModel(IConverterService converterService, IFileService fileService) : ObservableObject
     {
-        private readonly IConverterService _converterService;
-        private readonly IFileService _fileService;
-
         [ObservableProperty]
         private ObservableCollection<ConversionItemViewModel> _models = new();
 
         [ObservableProperty]
-        private string _outputDirectory;
+        private string _outputDirectory = Directory.GetCurrentDirectory();
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(ConvertCommand))]
         private bool _isBusy;
 
         [ObservableProperty]
-        private string _logOutput;
-
-        public MainViewModel(IConverterService converterService, IFileService fileService)
-        {
-            _converterService = converterService;
-            _fileService = fileService;
-            _logOutput = "Ready to convert.\n";
-            _outputDirectory = System.IO.Directory.GetCurrentDirectory();
-        }
+        private string _logOutput = "Ready to convert.\n";
 
         [RelayCommand(CanExecute = nameof(CanConvert))]
         private async Task ConvertAsync()
         {
             IsBusy = true;
-            LogOutput = "";
+            LogOutput = string.Empty;
             AppendLog("Starting parallel conversion...");
 
             var tasks = Models.Where(m => m.Status != "Success").Select(async model =>
@@ -53,7 +39,7 @@ namespace HuggingFaceToOnnx.App.ViewModels
                 try
                 {
                     // We log with prefix
-                    await _converterService.ConvertModelAsync(modelDir, specificOutput, (msg) => AppendLog($"[{modelName}] {msg}"));
+                    await converterService.ConvertModelAsync(modelDir, specificOutput, (msg) => AppendLog($"[{modelName}] {msg}"));
                     model.Status = "Success";
                 }
                 catch (Exception ex)
@@ -77,10 +63,10 @@ namespace HuggingFaceToOnnx.App.ViewModels
         [RelayCommand]
         private void BrowseFiles()
         {
-            var files = _fileService.OpenFiles("Model Files|*.safetensors;*.bin;*.pt;*.h5|All Files|*.*");
+            var files = fileService.OpenFiles("Model Files|*.safetensors;*.bin;*.pt;*.h5|All Files|*.*");
             foreach (var file in files)
             {
-                if (!Models.Any(m => m.FilePath == file))
+                if (Models.All(m => m.FilePath != file))
                 {
                     Models.Add(new ConversionItemViewModel(file));
                 }
@@ -91,8 +77,8 @@ namespace HuggingFaceToOnnx.App.ViewModels
         [RelayCommand]
         private void BrowseOutputFolder()
         {
-            var folder = _fileService.PickFolder();
-            if (!string.IsNullOrEmpty(folder))
+            var folder = fileService.PickFolder();
+            if (!string.IsNullOrWhiteSpace(folder))
             {
                 OutputDirectory = folder;
             }
@@ -102,7 +88,7 @@ namespace HuggingFaceToOnnx.App.ViewModels
         {
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                LogOutput += message + "\n";
+                LogOutput += $"{message}\n";
             });
         }
     }

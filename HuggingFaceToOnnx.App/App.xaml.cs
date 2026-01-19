@@ -1,12 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using HuggingFaceToOnnx.App.Services;
 using HuggingFaceToOnnx.App.ViewModels;
-using System;
 using System.Windows;
 
 namespace HuggingFaceToOnnx.App
 {
-    public partial class App : Application
+    public partial class App
     {
         public IServiceProvider Services { get; }
 

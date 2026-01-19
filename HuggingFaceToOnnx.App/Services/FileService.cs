@@ -1,6 +1,4 @@
 using Microsoft.Win32;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace HuggingFaceToOnnx.App.Services
 {
@@ -21,6 +19,7 @@ namespace HuggingFaceToOnnx.App.Services
 
             return Enumerable.Empty<string>();
         }
+
         public string? PickFolder()
         {
             var dialog = new OpenFolderDialog
@@ -28,11 +27,7 @@ namespace HuggingFaceToOnnx.App.Services
                 Title = "Select Output Folder"
             };
 
-            if (dialog.ShowDialog() == true)
-            {
-                return dialog.FolderName;
-            }
-            return null;
+            return dialog.ShowDialog() == true ? dialog.FolderName : null;
         }
     }
 }
