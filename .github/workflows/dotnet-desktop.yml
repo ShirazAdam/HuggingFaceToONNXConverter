@@ -1,15 +1,4 @@
-# This workflow builds and publishes the WPF application.
-# For Microsoft Store submission, use the MSIX Packaging Tool to package the published output.
-#
-# Prerequisites for Store submission:
-#   1. Create an Azure AD application associated with your Partner Center account.
-#   2. Add the following secrets to your GitHub repository:
-#      - SELLER_ID: Your Partner Center Seller ID
-#      - TENANT_ID: Azure AD Tenant ID
-#      - CLIENT_ID: Azure AD Application (Client) ID
-#      - CLIENT_SECRET: Azure AD Application Secret
-
-name: .NET Core Desktop
+name: .NET Desktop
 
 on:
   push:
@@ -90,17 +79,3 @@ jobs:
         with:
           name: HuggingFaceToOnnx-win-arm64
           path: packages/arm64
-
-      - name: Install MSStore CLI
-        run: dotnet tool install --global MSStore.CLI
-
-      - name: Configure MSStore CLI
-        run: |
-          msstore reconfigure `
-            --tenantId ${{ secrets.TENANT_ID }} `
-            --clientId ${{ secrets.CLIENT_ID }} `
-            --clientSecret ${{ secrets.CLIENT_SECRET }} `
-            --sellerId ${{ secrets.SELLER_ID }}
-
-      - name: Submit to Microsoft Store
-        run: msstore publish --inputDirectory packages --verbose
