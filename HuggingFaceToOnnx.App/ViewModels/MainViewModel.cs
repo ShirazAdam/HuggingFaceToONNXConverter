@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HuggingFaceToOnnx.App.Services;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 
 namespace HuggingFaceToOnnx.App.ViewModels
@@ -90,6 +91,21 @@ namespace HuggingFaceToOnnx.App.ViewModels
             {
                 LogOutput += $"{message}\n";
             });
+        }
+
+        [RelayCommand]
+        private void OpenUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url)) return;
+            
+            try
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            catch
+            {
+                AppendLog($"Failed to open URL: {url}");
+            }
         }
     }
 }
