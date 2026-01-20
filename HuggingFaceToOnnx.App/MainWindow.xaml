@@ -76,7 +76,7 @@
 
         <!-- Footer link (MVVM: bound to ViewModel command) -->
         <TextBlock Grid.Row="5" HorizontalAlignment="Center" Margin="0,10,0,0">
-            For instructions to using this software see
+            For instructions on using this software see
             <Hyperlink Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/ShirazAdam/HuggingFaceToONNXConverter">
                 https://github.com/ShirazAdam/HuggingFaceToONNXConverter
             </Hyperlink>
