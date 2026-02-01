@@ -419,3 +419,9 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+*.pfx.password
+*.csproj.user
+*.msixbundle
+*.appinstaller
+/.github/copilot-instructions.md
