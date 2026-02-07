@@ -10,7 +10,7 @@
   <Identity
     Name="ShirazAdam.HuggingFaceToONNXConverter"
     Publisher="CN=60B53B81-BBEB-47D6-9426-C53FD58FC284"
-    Version="0.0.41.0" />
+    Version="0.0.42.0" />
 
   <Properties>
     <DisplayName>Hugging Face To ONNX Converter</DisplayName>
@@ -30,7 +30,7 @@
   <Applications>
     <Application Id="App"
       Executable="$targetnametoken$.exe"
-      EntryPoint="$targetentrypoint$" >
+      EntryPoint="Windows.PartialTrustApplication" >
       <uap:VisualElements
         DisplayName="Hugging Face To ONNX"
         Description="For converting models hosted on Hugging Face to the ONNX format"
@@ -67,6 +67,6 @@
   </Applications>
 
   <Capabilities>
-    <rescap:Capability Name="runFullTrust" />
+    <!--<rescap:Capability Name="runFullTrust" />-->
   </Capabilities>
 </Package>
