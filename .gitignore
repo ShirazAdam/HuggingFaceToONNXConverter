@@ -425,3 +425,4 @@ FodyWeavers.xsd
 *.msixbundle
 *.appinstaller
 /.github/copilot-instructions.md
+/.idea/.idea.HuggingFaceToOnnx/.idea
