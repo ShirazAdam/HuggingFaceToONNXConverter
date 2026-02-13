@@ -1,6 +1,6 @@
-# HuggingFace to ONNX Converter (https://apps.microsoft.com/detail/9NK6VT89920M?hl=en-gb&gl=GB)
+# HuggingFace to ONNX Converter
 
-A Windows desktop application (WPF) that enables easy conversion of Hugging Face models to the ONNX format. Built with .NET 10 and C#.
+A Windows desktop application (WPF) that enables easy conversion of Hugging Face models to the ONNX format. Built with .NET 10 and C#. Download from the Microsoft Store at https://apps.microsoft.com/detail/9NK6VT89920M?hl=en-gb&gl=GB
 
 ## Features
 
